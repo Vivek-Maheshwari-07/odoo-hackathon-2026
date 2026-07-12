@@ -22,6 +22,9 @@ model User {
   employee           Employee?
   allocations_created AssetAllocation[] @relation("AllocationAllocator")
   transfers_approved  TransferRequest[] @relation("TransferApprover")
+  bookings            Booking[]            @relation("BookedBy")
+  maint_reported      MaintenanceRequest[] @relation("MaintReportedBy")
+  maint_assigned      MaintenanceRequest[] @relation("MaintAssignedTech")
 
   @@map("users")
 }
@@ -103,10 +106,11 @@ model Asset {
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
 
-  category          AssetCategory   @relation(fields: [category_id], references: [id], onDelete: Cascade)
-  department        Department      @relation(fields: [department_id], references: [id], onDelete: Cascade)
-  allocations       AssetAllocation[]
-  transfer_requests TransferRequest[]
+  category             AssetCategory        @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  department           Department           @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  allocations          AssetAllocation[]
+  transfer_requests    TransferRequest[]
+  maintenance_requests MaintenanceRequest[]
 
   @@map("assets")
 }
@@ -160,3 +164,100 @@ model TransferRequest {
 
   @@map("transfer_requests")
 }
+
+// ============================================================
+// MODULE 5 – RESOURCE BOOKING
+// ============================================================
+model Resource {
+  id            Int            @id @default(autoincrement())
+  resource_name String         @db.VarChar(150)
+  resource_type String         @db.VarChar(100) // Meeting Room, Conference Room, Projector, Company Vehicle, Shared Equipment
+  location      String?        @db.VarChar(200)
+  capacity      Int?
+  status        String         @default("Active") @db.VarChar(50) // Active | Inactive | Under Maintenance
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  bookings      Booking[]
+
+  @@map("resources")
+}
+
+model Booking {
+  id           Int       @id @default(autoincrement())
+  resource_id  Int
+  employee_id  Int
+  booking_date DateTime  @db.Date
+  start_time   String    @db.VarChar(10) // HH:mm
+  end_time     String    @db.VarChar(10) // HH:mm
+  purpose      String    @db.VarChar(300)
+  notes        String?   @db.Text
+  status       String    @default("Upcoming") @db.VarChar(50) // Upcoming | Ongoing | Completed | Cancelled
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  resource     Resource  @relation(fields: [resource_id], references: [id], onDelete: Cascade)
+  user         User      @relation("BookedBy", fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@index([resource_id, booking_date])
+  @@index([status])
+  @@map("bookings")
+}
+
+// ============================================================
+// MODULE 6 – MAINTENANCE MANAGEMENT
+// ============================================================
+model MaintenanceRequest {
+  id            Int       @id @default(autoincrement())
+  asset_id      Int
+  employee_id   Int
+  technician_id Int?
+  issue_title   String    @db.VarChar(300)
+  description   String    @db.Text
+  priority      String    @db.VarChar(50) // Low | Medium | High | Critical
+  status        String    @default("Pending") @db.VarChar(50) // Pending | Approved | Tech Assigned | In Progress | Resolved | Rejected
+  photo         String?   @db.VarChar(500)
+  resolved_at   DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  asset       Asset                  @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  reporter    User                   @relation("MaintReportedBy", fields: [employee_id], references: [id], onDelete: Cascade)
+  technician  User?                  @relation("MaintAssignedTech", fields: [technician_id], references: [id], onDelete: SetNull)
+  timeline    MaintenanceTimeline[]
+  comments    MaintenanceComment[]
+
+  @@index([asset_id])
+  @@index([employee_id])
+  @@index([status])
+  @@map("maintenance_requests")
+}
+
+model MaintenanceTimeline {
+  id             Int       @id @default(autoincrement())
+  request_id     Int
+  changed_by_id  Int
+  from_status    String?   @db.VarChar(50)
+  to_status      String    @db.VarChar(50)
+  note           String?   @db.VarChar(500)
+  created_at     DateTime  @default(now())
+
+  request        MaintenanceRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([request_id])
+  @@map("maintenance_timeline")
+}
+
+model MaintenanceComment {
+  id          Int       @id @default(autoincrement())
+  request_id  Int
+  author_id   Int
+  body        String    @db.Text
+  created_at  DateTime  @default(now())
+
+  request     MaintenanceRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([request_id])
+  @@map("maintenance_comments")
+}
+
