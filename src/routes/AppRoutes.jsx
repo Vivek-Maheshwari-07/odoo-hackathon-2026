@@ -14,6 +14,7 @@ import Reports from '../pages/Reports';
 import ComingSoon from '../pages/ComingSoon';
 import ResourceBooking from '../pages/ResourceBooking';
 import Maintenance from '../pages/Maintenance';
+import Dashboard from '../pages/Dashboard';
 
 /**
  * Defines routes for the AssetFlow module structure.
@@ -29,7 +30,8 @@ const AppRoutes = () => {
       <Route path="/organization-setup" element={<OrganizationSetup />} />
       
       {/* Sidebar Mock Placeholder Routes */}
-      <Route path="/dashboard" element={<ComingSoon title="Dashboard" />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+
       <Route path="/assets" element={<Assets />} />
       <Route path="/assets/:id" element={<AssetDetails />} />
       <Route path="/allocation" element={<Allocation />} />
