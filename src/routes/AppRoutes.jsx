@@ -4,6 +4,8 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import ForgotPassword from '../pages/ForgotPassword';
 import OrganizationSetup from '../pages/OrganizationSetup';
+import Assets from '../pages/Assets';
+import AssetDetails from '../pages/AssetDetails';
 import ComingSoon from '../pages/ComingSoon';
 
 /**
@@ -21,7 +23,8 @@ const AppRoutes = () => {
       
       {/* Sidebar Mock Placeholder Routes */}
       <Route path="/dashboard" element={<ComingSoon title="Dashboard" />} />
-      <Route path="/assets" element={<ComingSoon title="Assets" />} />
+      <Route path="/assets" element={<Assets />} />
+      <Route path="/assets/:id" element={<AssetDetails />} />
       <Route path="/allocation" element={<ComingSoon title="Allocation & Transfer" />} />
       <Route path="/booking" element={<ComingSoon title="Resource Booking" />} />
       <Route path="/maintenance" element={<ComingSoon title="Maintenance" />} />

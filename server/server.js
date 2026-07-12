@@ -18,11 +18,16 @@ app.use(cors({
 // Body parsing
 app.use(express.json());
 
+// Serve static uploads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Routes mapping
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/departments', require('./routes/deptRoutes'));
 app.use('/api/categories', require('./routes/catRoutes'));
 app.use('/api/employees', require('./routes/empRoutes'));
+app.use('/api/assets', require('./routes/assetRoutes'));
 
 // Root path fallback
 app.get('/', (req, res) => {

@@ -31,6 +31,7 @@ model Department {
   updated_at           DateTime  @updatedAt
 
   employees            Employee[] @relation("EmpDept")
+  assets               Asset[]
 
   @@map("departments")
 }
@@ -44,6 +45,8 @@ model AssetCategory {
   status             String   @default("Active") @db.VarChar(50)
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+
+  assets             Asset[]
 
   @@map("asset_categories")
 }
@@ -63,4 +66,28 @@ model Employee {
   department    Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
 
   @@map("employees")
+}
+
+model Asset {
+  id                 Int           @id @default(autoincrement())
+  asset_tag          String        @unique @db.VarChar(50)
+  asset_name         String        @db.VarChar(255)
+  category_id        Int
+  serial_number      String        @unique @db.VarChar(255)
+  purchase_date      DateTime?
+  purchase_cost      Float?
+  condition          String        @db.VarChar(50)
+  location           String        @db.VarChar(255)
+  department_id      Int
+  description        String?       @db.Text
+  image              String?       @db.VarChar(255)
+  is_shared          Boolean       @default(false)
+  status             String        @default("Available") @db.VarChar(50)
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  category           AssetCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  department         Department    @relation(fields: [department_id], references: [id], onDelete: Cascade)
+
+  @@map("assets")
 }

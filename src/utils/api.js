@@ -60,8 +60,9 @@ export const apiFetch = async (endpoint, options = {}) => {
   const url = endpoint.startsWith('/') ? `/api${endpoint}` : `/api/${endpoint}`;
 
   const token = getToken();
+  const isFormData = options.body instanceof FormData;
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {})
   };
 
@@ -74,8 +75,12 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers
   };
 
-  if (options.body && typeof options.body === 'object') {
-    fetchOptions.body = JSON.stringify(options.body);
+  if (options.body) {
+    if (isFormData) {
+      fetchOptions.body = options.body;
+    } else if (typeof options.body === 'object') {
+      fetchOptions.body = JSON.stringify(options.body);
+    }
   }
 
   try {
