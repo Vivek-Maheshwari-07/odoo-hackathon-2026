@@ -12,6 +12,7 @@ import MaintenanceModal   from '../components/maintenance/MaintenanceModal';
 import RequestDetailsPanel from '../components/maintenance/RequestDetailsPanel';
 import MaintenanceTable   from '../components/maintenance/MaintenanceTable';
 import { fetchAllocatedAssets } from '../services/maintenanceService';
+import AppLayout from '../components/layout/AppLayout';
 
 const STAT_CARDS = [
   { key: 'pending',    label: 'Pending',     Icon: Clock,        gradient: 'from-yellow-400 to-yellow-500' },
@@ -180,8 +181,8 @@ const Maintenance = () => {
   const hasFilters = search || filterStatus || filterPriority;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <AppLayout>
+      <div className="max-w-screen-2xl mx-auto py-2 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
@@ -409,7 +410,7 @@ const Maintenance = () => {
       />
 
       <Toast toasts={toasts} remove={removeToast} />
-    </div>
+    </AppLayout>
   );
 };
 

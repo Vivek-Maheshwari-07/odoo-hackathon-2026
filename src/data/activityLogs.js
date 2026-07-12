@@ -5,15 +5,12 @@
  * Roles: 'Admin', 'Asset Manager', 'Employee', 'Department Head', 'Technician', 'Auditor'
  * Modules: 'System', 'Assets', 'Booking', 'Allocation', 'Maintenance', 'Audit'
  * Statuses: 'Success', 'Failed', 'Pending'
- * 
- * Future API Integration:
- * GET /api/activity-logs -> Returns this list
  */
 
 export const mockActivityLogs = [
   {
     id: 'act-1',
-    user: 'Alex Rivera',
+    user: 'Vivek Maheshwari',
     role: 'Admin',
     action: 'created Department (Research & Development)',
     module: 'System',
@@ -24,7 +21,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-2',
-    user: 'Marcus Vance',
+    user: 'Rahul Sharma',
     role: 'Asset Manager',
     action: 'registered Laptop (MacBook Pro M3 Max - Tag: AST-01024)',
     module: 'Assets',
@@ -35,7 +32,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-3',
-    user: 'Elena Rostova',
+    user: 'Aman Verma',
     role: 'Employee',
     action: 'booked Meeting Room (Conference Room B - Reservation: RES-2041)',
     module: 'Booking',
@@ -46,7 +43,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-4',
-    user: 'Diana Prince',
+    user: 'Priya Patel',
     role: 'Department Head',
     action: 'approved Transfer (10 Ergonomic Chairs to Logistics Hub)',
     module: 'Allocation',
@@ -57,8 +54,8 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-5',
-    user: 'John Doe',
-    role: 'Technician',
+    user: 'Rahul Sharma',
+    role: 'Asset Manager',
     action: 'resolved Maintenance (Server Rack A cooling fan replacement)',
     module: 'Maintenance',
     date: '2026-07-11',
@@ -68,8 +65,8 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-6',
-    user: 'Sarah Connor',
-    role: 'Auditor',
+    user: 'Priya Patel',
+    role: 'Department Head',
     action: 'completed Audit (Q2 Laptop Check - 142 items verified)',
     module: 'Audit',
     date: '2026-07-11',
@@ -79,7 +76,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-7',
-    user: 'Alex Rivera',
+    user: 'Vivek Maheshwari',
     role: 'Admin',
     action: 'updated System Security Policies (Password complexity rules)',
     module: 'System',
@@ -90,7 +87,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-8',
-    user: 'Marcus Vance',
+    user: 'Rahul Sharma',
     role: 'Asset Manager',
     action: 'registered Laptop (Dell Latitude 5440 - Tag: AST-01025)',
     module: 'Assets',
@@ -101,7 +98,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-9',
-    user: 'Marcus Vance',
+    user: 'Rahul Sharma',
     role: 'Asset Manager',
     action: 'attempted bulk import of retired assets',
     module: 'Assets',
@@ -112,7 +109,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-10',
-    user: 'Elena Rostova',
+    user: 'Aman Verma',
     role: 'Employee',
     action: 'booked Meeting Room (Training Lab A - RES-2039)',
     module: 'Booking',
@@ -123,7 +120,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-11',
-    user: 'Diana Prince',
+    user: 'Priya Patel',
     role: 'Department Head',
     action: 'denied Transfer Request (MacBook Pro to External Contractor)',
     module: 'Allocation',
@@ -134,8 +131,8 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-12',
-    user: 'John Doe',
-    role: 'Technician',
+    user: 'Rahul Sharma',
+    role: 'Asset Manager',
     action: 'initiated Maintenance (Routine calibration on 3D Printer #3)',
     module: 'Maintenance',
     date: '2026-07-09',
@@ -145,8 +142,8 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-13',
-    user: 'Sarah Connor',
-    role: 'Auditor',
+    user: 'Priya Patel',
+    role: 'Department Head',
     action: 'started Audit (Storage Room B Hardware Inventory)',
     module: 'Audit',
     date: '2026-07-08',
@@ -156,7 +153,7 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-14',
-    user: 'Alex Rivera',
+    user: 'Vivek Maheshwari',
     role: 'Admin',
     action: 'deactivated User Account (Retired staff member: R. Miller)',
     module: 'System',
@@ -167,8 +164,8 @@ export const mockActivityLogs = [
   },
   {
     id: 'act-15',
-    user: 'John Doe',
-    role: 'Technician',
+    user: 'Rahul Sharma',
+    role: 'Asset Manager',
     action: 'resolved Maintenance (Server UPS battery diagnostic check)',
     module: 'Maintenance',
     date: '2026-07-07',

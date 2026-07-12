@@ -8,13 +8,14 @@ const {
   getAuditReports,
   exportReport
 } = require('../controllers/reportController');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // All reports paths mapped to endpoints under /api/reports/
-router.get('/dashboard', getDashboardStats);
-router.get('/assets', getAssetReports);
-router.get('/maintenance', getMaintenanceReports);
-router.get('/bookings', getBookingReports);
-router.get('/audit', getAuditReports);
-router.get('/export', exportReport);
+router.get('/dashboard', authMiddleware, getDashboardStats);
+router.get('/assets', authMiddleware, getAssetReports);
+router.get('/maintenance', authMiddleware, getMaintenanceReports);
+router.get('/bookings', authMiddleware, getBookingReports);
+router.get('/audit', authMiddleware, getAuditReports);
+router.get('/export', authMiddleware, exportReport);
 
 module.exports = router;

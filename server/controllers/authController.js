@@ -56,7 +56,14 @@ const login = async (req, res) => {
 
     const emailLower = email.trim().toLowerCase();
     const user = await prisma.user.findUnique({
-      where: { email: emailLower }
+      where: { email: emailLower },
+      include: {
+        employee: {
+          include: {
+            department: true
+          }
+        }
+      }
     });
 
     if (!user) {
@@ -86,7 +93,8 @@ const login = async (req, res) => {
         fullName: user.full_name,
         email: user.email,
         role: user.role,
-        status: user.status
+        status: user.status,
+        department: user.employee?.department?.department_name || 'N/A'
       }
     });
   } catch (error) {
@@ -96,15 +104,36 @@ const login = async (req, res) => {
 };
 
 const profile = async (req, res) => {
-  return res.status(200).json({
-    user: {
-      id: req.user.id,
-      fullName: req.user.full_name,
-      email: req.user.email,
-      role: req.user.role,
-      status: req.user.status
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: {
+        employee: {
+          include: {
+            department: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
     }
-  });
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        fullName: user.full_name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        department: user.employee?.department?.department_name || 'N/A'
+      }
+    });
+  } catch (error) {
+    console.error('Profile Error:', error);
+    return res.status(500).json({ message: 'An internal server error occurred.' });
+  }
 };
 
 const logout = async (req, res) => {

@@ -8,7 +8,8 @@ const adapter = new PrismaMariaDb({
   port: parseInt(dbUrl.port || '3306', 10),
   user: dbUrl.username,
   password: decodeURIComponent(dbUrl.password),
-  database: dbUrl.pathname.replace(/^\//, '')
+  database: dbUrl.pathname.replace(/^\//, ''),
+  allowPublicKeyRetrieval: true
 });
 
 const prisma = new PrismaClient({ adapter });

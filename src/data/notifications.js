@@ -5,12 +5,6 @@
  * Categories: 'System', 'Maintenance', 'Booking', 'Audit', 'Allocation'
  * Priorities: 'Low', 'Medium', 'High', 'Critical'
  * Statuses: 'Read', 'Unread'
- * 
- * Future API Integration:
- * GET /api/notifications -> Returns this list
- * PUT /api/notifications/:id/read -> Updates read status
- * PUT /api/notifications/read-all -> Marks all notifications as read
- * DELETE /api/notifications/:id -> Deletes a notification
  */
 
 export const mockNotifications = [
@@ -19,7 +13,7 @@ export const mockNotifications = [
     type: 'Asset Assigned',
     category: 'Allocation',
     title: 'MacBook Pro 16" Assigned',
-    description: 'MacBook Pro 16" (Asset Tag: AST-00249) has been successfully assigned to Sarah Jenkins (Engineering).',
+    description: 'MacBook Pro 16" (Asset Tag: AST-003) has been successfully assigned to Priya Patel (Engineering).',
     priority: 'Low',
     status: 'Unread',
     date: '2026-07-12',
@@ -29,8 +23,8 @@ export const mockNotifications = [
     id: 'notif-2',
     type: 'Overdue Return',
     category: 'Allocation',
-    title: 'Overdue Return: iPad Pro',
-    description: 'iPad Pro (Asset Tag: AST-00892) assigned to David Lee was scheduled to be returned on 2026-07-10.',
+    title: 'Overdue Return: Dell Latitude 5440',
+    description: 'Dell Latitude 5440 (Asset Tag: AST-002) assigned to Aman Verma was scheduled to be returned on 2026-07-10.',
     priority: 'High',
     status: 'Unread',
     date: '2026-07-12',
@@ -73,8 +67,8 @@ export const mockNotifications = [
     id: 'notif-6',
     type: 'Asset Lost',
     category: 'System',
-    title: 'Critical Report: Lenovo ThinkPad Lost',
-    description: 'Lenovo ThinkPad Carbon X1 (Asset Tag: AST-00512) has been reported as lost by Mark Spencer.',
+    title: 'Critical Report: Logitech Rally Bar Lost',
+    description: 'Logitech Rally Bar Video System (Asset Tag: AST-028) has been reported as lost by Priya Patel.',
     priority: 'Critical',
     status: 'Unread',
     date: '2026-07-11',
@@ -150,8 +144,8 @@ export const mockNotifications = [
     id: 'notif-13',
     type: 'Asset Assigned',
     category: 'Allocation',
-    title: 'New Assignment: DJI Mavic Drone',
-    description: 'DJI Mavic Pro (Asset Tag: AST-00991) assigned to Creative Team for site survey.',
+    title: 'New Assignment: Dell Monitor',
+    description: 'Dell UltraSharp 27 Monitor (Asset Tag: AST-021) assigned to Rohit Mehta for Finance operations.',
     priority: 'Medium',
     status: 'Unread',
     date: '2026-07-08',
@@ -161,8 +155,8 @@ export const mockNotifications = [
     id: 'notif-14',
     type: 'Overdue Return',
     category: 'Allocation',
-    title: 'Overdue Return: 3D Printer v2',
-    description: 'Ultimaker 3D Printer (Asset Tag: AST-00431) has exceeded its scheduled return date by 3 days.',
+    title: 'Overdue Return: Standing Desk',
+    description: 'Standing Desk Pro (Asset Tag: AST-011) has exceeded its scheduled return date by 3 days.',
     priority: 'High',
     status: 'Read',
     date: '2026-07-07',

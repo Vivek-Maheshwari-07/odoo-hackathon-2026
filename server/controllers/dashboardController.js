@@ -8,14 +8,18 @@ const getDashboardData = async (req, res) => {
   try {
     const { id: userId, role, full_name: fullName } = req.user;
 
-    // Fetch employee association if applicable
-    let employee = null;
-    if (role !== 'Admin' && role !== 'Asset Manager') {
-      employee = await prisma.employee.findUnique({
-        where: { user_id: userId },
-        include: { department: true }
-      }).catch(() => null);
-    }
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        employee: {
+          include: {
+            department: true
+          }
+        }
+      }
+    });
+    const departmentName = dbUser?.employee?.department?.department_name || 'N/A';
+    const employee = dbUser?.employee;
 
     const todayStr = new Date().toISOString().split('T')[0];
     const now = new Date();
@@ -265,6 +269,7 @@ const getDashboardData = async (req, res) => {
       return res.status(200).json({
         role,
         fullName,
+        department: departmentName,
         kpis: {
           totalAssets,
           availableAssets,
@@ -435,6 +440,7 @@ const getDashboardData = async (req, res) => {
       return res.status(200).json({
         role,
         fullName,
+        department: departmentName,
         kpis: {
           allocatedAssetsCount: myAllocations.length,
           activeBookingsCount: myBookingsCount,

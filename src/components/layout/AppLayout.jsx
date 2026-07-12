@@ -24,6 +24,15 @@ export const AppLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const checkActive = (itemPath) => {
+    const path = location.pathname;
+    if (itemPath === '/dashboard') return path === '/dashboard';
+    if (itemPath === '/allocation') {
+      return path.startsWith('/allocation') || path.startsWith('/transfers');
+    }
+    return path.startsWith(itemPath);
+  };
+
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Organization Setup', path: '/organization-setup', icon: Building2 },
@@ -36,7 +45,7 @@ export const AppLayout = ({ children }) => {
     { name: 'Notifications', path: '/notifications', icon: Bell },
   ];
 
-  const user = getUser() || { fullName: 'Admin User', email: 'admin@company.com', role: 'Admin' };
+  const user = getUser() || { fullName: 'User', email: 'user@company.com', role: 'Employee', department: 'N/A' };
   const initials = user.fullName
     ? user.fullName
         .split(' ')
@@ -64,7 +73,7 @@ export const AppLayout = ({ children }) => {
         <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive = checkActive(item.path);
             return (
               <Link
                 key={item.name}
@@ -121,7 +130,7 @@ export const AppLayout = ({ children }) => {
             <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive = checkActive(item.path);
                 return (
                   <Link
                     key={item.name}
@@ -207,11 +216,11 @@ export const AppLayout = ({ children }) => {
                 </div>
                 <div className="hidden md:flex flex-col items-start text-left">
                   <span className="text-xs font-bold text-text-primary leading-none">{user.fullName}</span>
-                  <span className="text-[10px] text-text-secondary font-medium">{user.role}</span>
+                  <span className="text-[10px] text-text-secondary font-medium">{user.role} {user.department && user.department !== 'N/A' ? `(${user.department})` : ''}</span>
                 </div>
                 <ChevronDown className="h-4 w-4 text-slate-400" />
               </button>
-
+ 
               {isUserDropdownOpen && (
                 <>
                   {/* Click trigger area to close */}
@@ -220,6 +229,7 @@ export const AppLayout = ({ children }) => {
                     <div className="px-4 py-2 border-b border-border">
                       <p className="text-xs font-bold text-text-primary">{user.fullName}</p>
                       <p className="text-[10px] text-text-secondary overflow-hidden text-ellipsis">{user.email}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{user.role} • {user.department || 'N/A'}</p>
                     </div>
                     <button
                       onClick={() => {

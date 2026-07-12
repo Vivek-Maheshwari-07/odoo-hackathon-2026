@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
-import PageHeader from '../components/layout/PageHeader';
 import DashboardCards from '../components/DashboardCards';
 import BarChart from '../components/BarChart';
 import LineChart from '../components/LineChart';
@@ -13,18 +12,15 @@ import {
   Plus, 
   Calendar, 
   Wrench, 
-  ClipboardCheck, 
   ArrowRightLeft, 
   Building2, 
-  BarChart3, 
   ShieldAlert,
   Clock,
   Sparkles
 } from 'lucide-react';
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
-  const user = getUser() || { fullName: 'Admin User', role: 'Admin' };
+  const user = getUser() || { fullName: 'User', role: 'Employee' };
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

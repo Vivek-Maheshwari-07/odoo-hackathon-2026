@@ -139,7 +139,7 @@ const RequestDetailsPanel = ({
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Photo</h3>
               <img
                 src={request.photo}
-                alt="Issue photo"
+                alt="Issue detail"
                 className="w-full rounded-xl border border-[#E2E8F0] object-cover max-h-52"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />

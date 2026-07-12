@@ -6,7 +6,7 @@ import ActivityTable from '../components/ActivityTable';
 import Timeline from '../components/Timeline';
 import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
-import Pagination from '../components/Pagination';
+import Pagination from '../components/common/Pagination';
 import { 
   Table, 
   History, 
@@ -98,7 +98,6 @@ export const ActivityLogs = () => {
   };
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
   const paginatedLogs = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredLogs.slice(start, start + ITEMS_PER_PAGE);
@@ -226,10 +225,9 @@ export const ActivityLogs = () => {
         {filteredLogs.length > 0 && (
           <Pagination 
             currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalEntries={filteredLogs.length}
+            totalItems={filteredLogs.length}
             itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={handlePageChange}
           />
         )}
 

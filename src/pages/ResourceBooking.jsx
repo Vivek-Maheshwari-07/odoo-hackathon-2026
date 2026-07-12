@@ -11,6 +11,7 @@ import BookingTable       from '../components/booking/BookingTable';
 import CalendarView       from '../components/booking/CalendarView';
 import BookingModal       from '../components/booking/BookingModal';
 import BookingDetailsModal from '../components/booking/BookingDetailsModal';
+import AppLayout from '../components/layout/AppLayout';
 
 const RESOURCE_TYPES = [
   'Meeting Room', 'Conference Room', 'Projector',
@@ -235,8 +236,8 @@ const ResourceBooking = () => {
   const hasFilters = search || filterType || filterStatus || filterDate;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <AppLayout>
+      <div className="max-w-screen-xl mx-auto py-2 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -456,7 +457,7 @@ const ResourceBooking = () => {
       />
 
       <Toast toasts={toasts} removeToast={removeToast} />
-    </div>
+    </AppLayout>
   );
 };
 

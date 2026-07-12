@@ -7,7 +7,7 @@ import NotificationTable from '../components/NotificationTable';
 import NotificationDrawer from '../components/NotificationDrawer';
 import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
-import Pagination from '../components/Pagination';
+import Pagination from '../components/common/Pagination';
 import { 
   Bell, 
   MailOpen, 
@@ -107,7 +107,6 @@ export const Notifications = () => {
   }, [notifications, searchQuery, activeTab]);
 
   // Pagination bounds
-  const totalPages = Math.ceil(filteredNotifications.length / ITEMS_PER_PAGE);
   const paginatedNotifications = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredNotifications.slice(start, start + ITEMS_PER_PAGE);
@@ -302,10 +301,9 @@ export const Notifications = () => {
         {filteredNotifications.length > 0 && (
           <Pagination 
             currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalEntries={filteredNotifications.length}
+            totalItems={filteredNotifications.length}
             itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={handlePageChange}
           />
         )}
 
