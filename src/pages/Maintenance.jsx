@@ -12,6 +12,7 @@ import MaintenanceModal   from '../components/maintenance/MaintenanceModal';
 import RequestDetailsPanel from '../components/maintenance/RequestDetailsPanel';
 import MaintenanceTable   from '../components/maintenance/MaintenanceTable';
 import { fetchAllocatedAssets } from '../services/maintenanceService';
+import { apiFetch } from '../utils/api';
 import AppLayout from '../components/layout/AppLayout';
 
 const STAT_CARDS = [
@@ -104,10 +105,9 @@ const Maintenance = () => {
         setAssets(assetsData || []);
 
         // Load employees to filter technicians
-        const empRes = await fetch('http://localhost:5000/api/employees');
-        const employees = await empRes.json();
+        const employees = await apiFetch('/employees');
         // filter technician designation/role
-        const techs = employees.filter(e => e.designation?.toLowerCase().includes('tech') || e.user?.role?.toLowerCase().includes('tech') || e.role === 'Technician');
+        const techs = (Array.isArray(employees) ? employees : []).filter(e => e.designation?.toLowerCase().includes('tech') || e.user?.role?.toLowerCase().includes('tech') || e.role === 'Technician');
         setTechnicians(techs.map(t => ({ id: t.user_id, name: t.user?.full_name || t.employee_code })));
       } catch (err) {
         console.error('Error loading selection data:', err);

@@ -13,7 +13,8 @@ import {
   Menu, 
   X, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  History
 } from 'lucide-react';
 import Logo from './Logo';
 import { getUser, clearAuth } from '../../utils/api';
@@ -33,19 +34,58 @@ export const AppLayout = ({ children }) => {
     return path.startsWith(itemPath);
   };
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Organization Setup', path: '/organization-setup', icon: Building2 },
-    { name: 'Assets', path: '/assets', icon: Package },
-    { name: 'Allocation & Transfer', path: '/allocation', icon: ArrowLeftRight },
-    { name: 'Resource Booking', path: '/booking', icon: CalendarDays },
-    { name: 'Maintenance', path: '/maintenance', icon: Wrench },
-    { name: 'Audit', path: '/audit', icon: ClipboardCheck },
-    { name: 'Reports', path: '/reports', icon: BarChart3 },
-    { name: 'Notifications', path: '/notifications', icon: Bell },
-  ];
-
   const user = getUser() || { fullName: 'User', email: 'user@company.com', role: 'Employee', department: 'N/A' };
+  const role = user.role;
+
+  const getMenuItems = () => {
+    if (role === 'Admin') {
+      return [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Organization Setup', path: '/organization-setup', icon: Building2 },
+        { name: 'Assets', path: '/assets', icon: Package },
+        { name: 'Allocation & Transfer', path: '/allocation', icon: ArrowLeftRight },
+        { name: 'Resource Booking', path: '/booking', icon: CalendarDays },
+        { name: 'Maintenance', path: '/maintenance', icon: Wrench },
+        { name: 'Audit', path: '/audit', icon: ClipboardCheck },
+        { name: 'Reports', path: '/reports', icon: BarChart3 },
+        { name: 'Notifications', path: '/notifications', icon: Bell },
+        { name: 'Activity Logs', path: '/activity-logs', icon: History }
+      ];
+    } else if (role === 'Asset Manager') {
+      return [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Assets', path: '/assets', icon: Package },
+        { name: 'Allocation & Transfer', path: '/allocation', icon: ArrowLeftRight },
+        { name: 'Resource Booking', path: '/booking', icon: CalendarDays },
+        { name: 'Maintenance', path: '/maintenance', icon: Wrench },
+        { name: 'Audit', path: '/audit', icon: ClipboardCheck },
+        { name: 'Reports', path: '/reports', icon: BarChart3 },
+        { name: 'Notifications', path: '/notifications', icon: Bell }
+      ];
+    } else if (role === 'Department Head') {
+      return [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Department Assets', path: '/assets', icon: Package },
+        { name: 'Allocation Requests', path: '/allocation', icon: ArrowLeftRight },
+        { name: 'Transfer Requests', path: '/transfers', icon: ArrowLeftRight },
+        { name: 'Resource Booking', path: '/booking', icon: CalendarDays },
+        { name: 'Department Reports', path: '/reports', icon: BarChart3 },
+        { name: 'Notifications', path: '/notifications', icon: Bell }
+      ];
+    } else { // Employee
+      return [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'My Assets', path: '/assets', icon: Package },
+        { name: 'Resource Booking', path: '/booking', icon: CalendarDays },
+        { name: 'Maintenance Requests', path: '/maintenance', icon: Wrench },
+        { name: 'My Transfer Requests', path: '/transfers', icon: ArrowLeftRight },
+        { name: 'My Return Requests', path: '/allocation', icon: ArrowLeftRight },
+        { name: 'Notifications', path: '/notifications', icon: Bell }
+      ];
+    }
+  };
+
+  const menuItems = getMenuItems();
   const initials = user.fullName
     ? user.fullName
         .split(' ')

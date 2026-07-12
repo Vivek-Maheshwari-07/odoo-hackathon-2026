@@ -45,6 +45,30 @@ const getTransfers = async (req, res) => {
   try {
     const { status, search, page, limit } = req.query;
     const where = {};
+    const user = req.user;
+    const andFilters = [];
+
+    if (user.role === 'Employee') {
+      andFilters.push({
+        OR: [
+          { current_employee: { user_id: user.id } },
+          { requested_employee: { user_id: user.id } }
+        ]
+      });
+    } else if (user.role === 'Department Head') {
+      const empProfile = await prisma.employee.findUnique({
+        where: { user_id: user.id }
+      });
+      if (empProfile) {
+        andFilters.push({
+          OR: [
+            { current_department_id: empProfile.department_id },
+            { requested_department_id: empProfile.department_id }
+          ]
+        });
+      }
+    }
+
     const hasPagination = page !== undefined || limit !== undefined;
     const pageNumber = Math.max(parseInt(page, 10) || 1, 1);
     const pageSize = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
@@ -52,12 +76,18 @@ const getTransfers = async (req, res) => {
     if (status && status !== 'All') where.status = status;
 
     if (search) {
-      where.OR = [
-        { asset: { is: { asset_name: { contains: search } } } },
-        { asset: { is: { asset_tag: { contains: search } } } },
-        { current_employee: { is: { user: { is: { full_name: { contains: search } } } } } },
-        { requested_employee: { is: { user: { is: { full_name: { contains: search } } } } } },
-      ];
+      andFilters.push({
+        OR: [
+          { asset: { is: { asset_name: { contains: search } } } },
+          { asset: { is: { asset_tag: { contains: search } } } },
+          { current_employee: { is: { user: { is: { full_name: { contains: search } } } } } },
+          { requested_employee: { is: { user: { is: { full_name: { contains: search } } } } } },
+        ]
+      });
+    }
+
+    if (andFilters.length > 0) {
+      where.AND = andFilters;
     }
 
     const query = {

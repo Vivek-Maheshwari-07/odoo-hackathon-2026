@@ -18,12 +18,20 @@ import Dashboard from '../pages/Dashboard';
 import { Notifications } from '../pages/Notifications';
 import { ActivityLogs } from '../pages/ActivityLogs';
 
+import { getUser } from '../utils/api';
+
 /**
  * Defines routes for the AssetFlow module structure.
  */
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const token = localStorage.getItem('assetflow_token');
-  return token ? children : <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/login" replace />;
+
+  const user = getUser();
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
 };
 
 const AppRoutes = () => {
@@ -34,7 +42,7 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       
       {/* Protected Routes */}
-      <Route path="/organization-setup" element={<ProtectedRoute><OrganizationSetup /></ProtectedRoute>} />
+      <Route path="/organization-setup" element={<ProtectedRoute allowedRoles={['Admin']}><OrganizationSetup /></ProtectedRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/assets" element={<ProtectedRoute><Assets /></ProtectedRoute>} />
       <Route path="/assets/:id" element={<ProtectedRoute><AssetDetails /></ProtectedRoute>} />
@@ -43,10 +51,10 @@ const AppRoutes = () => {
       <Route path="/transfers" element={<ProtectedRoute><Transfers /></ProtectedRoute>} />
       <Route path="/booking" element={<ProtectedRoute><ResourceBooking /></ProtectedRoute>} />
       <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
-      <Route path="/audit" element={<ProtectedRoute><Audit /></ProtectedRoute>} />
-      <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+      <Route path="/audit" element={<ProtectedRoute allowedRoles={['Admin', 'Asset Manager']}><Audit /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute allowedRoles={['Admin', 'Asset Manager', 'Department Head']}><Reports /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-      <Route path="/activity-logs" element={<ProtectedRoute><ActivityLogs /></ProtectedRoute>} />
+      <Route path="/activity-logs" element={<ProtectedRoute allowedRoles={['Admin']}><ActivityLogs /></ProtectedRoute>} />
 
       {/* Redirect wildcards */}
       <Route path="/" element={<Navigate to="/login" replace />} />

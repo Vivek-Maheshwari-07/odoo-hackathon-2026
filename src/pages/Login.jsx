@@ -63,7 +63,7 @@ const Login = () => {
           message: 'Authentication successful! Welcome to AssetFlow ERP portal.'
         });
         setTimeout(() => {
-          navigate('/organization-setup');
+          navigate('/dashboard');
         }, 1000);
       })
       .catch((error) => {

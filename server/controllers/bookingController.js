@@ -204,6 +204,10 @@ const updateBooking = async (req, res) => {
     });
     if (!existing) return sendJson(res, 404, false, 'Booking not found.');
 
+    if (req.user.role !== 'Admin' && req.user.role !== 'Asset Manager' && existing.employee_id !== req.user.id) {
+      return sendJson(res, 403, false, 'You do not have permission to modify this booking.');
+    }
+
     const newDate = booking_date ? new Date(booking_date) : existing.booking_date;
     const newStartTime = start_time || existing.start_time;
     const newEndTime = end_time || existing.end_time;
@@ -261,6 +265,11 @@ const cancelBooking = async (req, res) => {
     const id = parseInt(req.params.id);
     const booking = await prisma.booking.findUnique({ where: { id } });
     if (!booking) return sendJson(res, 404, false, 'Booking not found.');
+
+    if (req.user.role !== 'Admin' && req.user.role !== 'Asset Manager' && booking.employee_id !== req.user.id) {
+      return sendJson(res, 403, false, 'You do not have permission to cancel this booking.');
+    }
+
     if (booking.status === 'Cancelled') {
       return sendJson(res, 409, false, 'Booking is already cancelled.');
     }

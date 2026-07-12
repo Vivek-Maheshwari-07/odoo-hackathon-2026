@@ -16,8 +16,8 @@ router.get('/stats',  authMiddleware, getAllocationStats);
 router.get('/recent', authMiddleware, getRecentAllocations);
 router.get('/',       authMiddleware, getAllocations);
 router.get('/:id',    authMiddleware, getAllocationById);
-router.post('/',      authMiddleware, roleMiddleware(['Admin']), createAllocation);
-router.put('/:id',    authMiddleware, roleMiddleware(['Admin']), returnAsset);
-router.delete('/:id', authMiddleware, roleMiddleware(['Admin']), deleteAllocation);
+router.post('/',      authMiddleware, roleMiddleware(['Admin', 'Asset Manager']), createAllocation);
+router.put('/:id',    authMiddleware, roleMiddleware(['Admin', 'Asset Manager']), returnAsset);
+router.delete('/:id', authMiddleware, roleMiddleware(['Admin', 'Asset Manager']), deleteAllocation);
 
 module.exports = router;

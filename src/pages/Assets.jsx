@@ -286,6 +286,7 @@ const Assets = () => {
   };
 
   const isAdmin = currentUser?.role === 'Admin';
+  const canManage = currentUser?.role === 'Admin' || currentUser?.role === 'Asset Manager';
 
   // -------------------------------------------------------
   // Render helpers
@@ -481,7 +482,7 @@ const Assets = () => {
             title="Asset Management"
             description="Register, track and manage corporate equipment lifecycle, status and category policies."
           />
-          {isAdmin && (
+          {canManage && (
             <Button onClick={openAdd} className="flex items-center gap-2 self-start sm:self-auto">
               <Plus className="h-4 w-4" />
               Register Asset
@@ -617,7 +618,7 @@ const Assets = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          {isAdmin && (
+                          {canManage && (
                             <>
                               <button
                                 onClick={() => openEdit(asset)}

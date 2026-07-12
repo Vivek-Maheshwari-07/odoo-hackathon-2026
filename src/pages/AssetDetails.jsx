@@ -218,7 +218,7 @@ const AssetDetails = () => {
     );
   }
 
-  const isAdmin = currentUser?.role === 'Admin';
+  const canManage = currentUser?.role === 'Admin' || currentUser?.role === 'Asset Manager';
   const imageUrl = asset.image
     ? (asset.image.startsWith('http') ? asset.image : `http://localhost:5000${asset.image}`)
     : null;
@@ -249,7 +249,7 @@ const AssetDetails = () => {
             Back to Asset Directory
           </button>
 
-          {isAdmin && (
+          {canManage && (
             <div className="flex items-center gap-2">
               <Button onClick={openEdit} variant="secondary" className="flex items-center gap-1.5 text-xs h-9">
                 <Edit2 className="h-3.5 w-3.5" /> Edit Details

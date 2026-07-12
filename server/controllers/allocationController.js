@@ -56,6 +56,18 @@ const getAllocations = async (req, res) => {
     const pageNumber = Math.max(parseInt(page, 10) || 1, 1);
     const pageSize = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
     const where = {};
+    const user = req.user;
+
+    if (user.role === 'Employee') {
+      where.employee = { user_id: user.id };
+    } else if (user.role === 'Department Head') {
+      const empProfile = await prisma.employee.findUnique({
+        where: { user_id: user.id }
+      });
+      if (empProfile) {
+        where.department_id = empProfile.department_id;
+      }
+    }
     const andFilters = [];
 
     if (department) {

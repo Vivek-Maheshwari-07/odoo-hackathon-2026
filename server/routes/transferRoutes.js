@@ -12,8 +12,8 @@ const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.get('/recent',       authMiddleware, getRecentTransfers);
 router.get('/',             authMiddleware, getTransfers);
-router.post('/',            authMiddleware, roleMiddleware(['Admin']), createTransfer);
-router.put('/:id/approve',  authMiddleware, roleMiddleware(['Admin']), approveTransfer);
-router.put('/:id/reject',   authMiddleware, roleMiddleware(['Admin']), rejectTransfer);
+router.post('/',            authMiddleware, createTransfer);
+router.put('/:id/approve',  authMiddleware, roleMiddleware(['Admin', 'Asset Manager', 'Department Head']), approveTransfer);
+router.put('/:id/reject',   authMiddleware, roleMiddleware(['Admin', 'Asset Manager', 'Department Head']), rejectTransfer);
 
 module.exports = router;

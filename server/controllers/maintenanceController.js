@@ -36,16 +36,39 @@ const getAllRequests = async (req, res) => {
     const { status, priority, assetId, employeeId, search } = req.query;
 
     const where = {};
+    const user = req.user;
+    const andFilters = [];
+
+    if (user.role === 'Employee') {
+      andFilters.push({ employee_id: user.id });
+    } else if (user.role === 'Department Head') {
+      const empProfile = await prisma.employee.findUnique({
+        where: { user_id: user.id }
+      });
+      if (empProfile) {
+        andFilters.push({
+          asset: { department_id: empProfile.department_id }
+        });
+      }
+    }
+
     if (status)     where.status   = status;
     if (priority)   where.priority = priority;
     if (assetId)    where.asset_id  = parseInt(assetId);
     if (employeeId) where.employee_id = parseInt(employeeId);
+
     if (search) {
-      where.OR = [
-        { issue_title:   { contains: search } },
-        { description:  { contains: search } },
-        { asset: { asset_name: { contains: search } } },
-      ];
+      andFilters.push({
+        OR: [
+          { issue_title:   { contains: search } },
+          { description:  { contains: search } },
+          { asset: { asset_name: { contains: search } } },
+        ]
+      });
+    }
+
+    if (andFilters.length > 0) {
+      where.AND = andFilters;
     }
 
     const requests = await prisma.maintenanceRequest.findMany({
@@ -332,6 +355,10 @@ const updateRequest = async (req, res) => {
     const request = await prisma.maintenanceRequest.findUnique({ where: { id } });
     if (!request) return sendJson(res, 404, false, 'Request not found.');
 
+    if (req.user.role !== 'Admin' && req.user.role !== 'Asset Manager' && request.employee_id !== req.user.id) {
+      return sendJson(res, 403, false, 'You do not have permission to modify this request.');
+    }
+
     if (request.status !== 'PENDING') {
       return sendJson(res, 409, false, 'Only PENDING requests can be edited.');
     }
@@ -362,6 +389,10 @@ const deleteRequest = async (req, res) => {
     const request = await prisma.maintenanceRequest.findUnique({ where: { id } });
     if (!request) return sendJson(res, 404, false, 'Request not found.');
 
+    if (req.user.role !== 'Admin' && req.user.role !== 'Asset Manager' && request.employee_id !== req.user.id) {
+      return sendJson(res, 403, false, 'You do not have permission to delete this request.');
+    }
+
     if (!['PENDING', 'REJECTED'].includes(request.status)) {
       return sendJson(res, 409, false, 'Only PENDING or REJECTED requests can be deleted.');
     }
@@ -379,14 +410,28 @@ const deleteRequest = async (req, res) => {
 // ─────────────────────────────────────────────
 const getStats = async (req, res) => {
   try {
+    const user = req.user;
+    const baseWhere = {};
+
+    if (user.role === 'Employee') {
+      baseWhere.employee_id = user.id;
+    } else if (user.role === 'Department Head') {
+      const empProfile = await prisma.employee.findUnique({
+        where: { user_id: user.id }
+      });
+      if (empProfile) {
+        baseWhere.asset = { department_id: empProfile.department_id };
+      }
+    }
+
     const [pending, approved, technicianAssigned, inProgress, resolved, rejected] =
       await Promise.all([
-        prisma.maintenanceRequest.count({ where: { status: 'PENDING' } }),
-        prisma.maintenanceRequest.count({ where: { status: 'APPROVED' } }),
-        prisma.maintenanceRequest.count({ where: { status: 'TECHNICIAN_ASSIGNED' } }),
-        prisma.maintenanceRequest.count({ where: { status: 'IN_PROGRESS' } }),
-        prisma.maintenanceRequest.count({ where: { status: 'RESOLVED' } }),
-        prisma.maintenanceRequest.count({ where: { status: 'REJECTED' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'PENDING' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'APPROVED' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'TECHNICIAN_ASSIGNED' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'IN_PROGRESS' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'RESOLVED' } }),
+        prisma.maintenanceRequest.count({ where: { ...baseWhere, status: 'REJECTED' } }),
       ]);
 
     return sendJson(res, 200, true, 'Stats retrieved.', {

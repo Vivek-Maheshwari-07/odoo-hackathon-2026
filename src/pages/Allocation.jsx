@@ -226,6 +226,7 @@ const Allocation = () => {
   };
 
   const isAdmin = currentUser?.role === 'Admin';
+  const canManage = currentUser?.role === 'Admin' || currentUser?.role === 'Asset Manager';
 
   // ─── KPI Card component ─────────────────────────────────────────────────────
   const KPICard = ({ icon: Icon, label, value, color, bg, accent }) => (
@@ -277,13 +278,13 @@ const Allocation = () => {
             className="p-1.5 rounded-lg text-text-secondary hover:text-primary hover:bg-slate-100 transition-colors">
             <Eye className="h-4 w-4" />
           </button>
-          {isAdmin && a.status !== 'Returned' && a.status !== 'Transferred' && (
+          {canManage && a.status !== 'Returned' && a.status !== 'Transferred' && (
             <button onClick={() => openReturn(a)} title="Return Asset"
               className="p-1.5 rounded-lg text-text-secondary hover:text-green-600 hover:bg-green-50 transition-colors">
               <CornerDownLeft className="h-4 w-4" />
             </button>
           )}
-          {isAdmin && (a.status === 'Active' || a.status === 'Overdue') && (
+          {(canManage || currentUser?.role === 'Department Head') && (a.status === 'Active' || a.status === 'Overdue') && (
             <button onClick={() => navigate(`/transfers?asset=${a.assetId}`)} title="Request Transfer"
               className="p-1.5 rounded-lg text-text-secondary hover:text-blue-600 hover:bg-blue-50 transition-colors">
               <ArrowLeftRight className="h-4 w-4" />
@@ -317,7 +318,7 @@ const Allocation = () => {
             title="Asset Allocation & Transfer"
             description="Manage asset assignments, returns, and department transfers across the organization."
           />
-          {isAdmin && (
+          {canManage && (
             <Button onClick={() => setAllocModal(true)} className="flex items-center gap-2 self-start sm:self-auto">
               <Plus className="h-4 w-4" /> Allocate Asset
             </Button>

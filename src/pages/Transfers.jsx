@@ -205,7 +205,7 @@ const Transfers = () => {
       .finally(() => setSubmitting(false));
   };
 
-  const isAdmin = currentUser?.role === 'Admin';
+  const canApprove = currentUser?.role === 'Admin' || currentUser?.role === 'Asset Manager' || currentUser?.role === 'Department Head';
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -230,7 +230,7 @@ const Transfers = () => {
             title="Transfer Requests"
             description="Manage asset handover requests between employees and departments."
           />
-          {isAdmin && (
+          {true && (
             <Button onClick={() => setCreateModal(true)} className="flex items-center gap-2 self-start sm:self-auto">
               <Plus className="h-4 w-4" /> New Transfer Request
             </Button>
@@ -271,7 +271,7 @@ const Transfers = () => {
             title="No Transfer Requests"
             description="There are no transfer requests matching your criteria."
             icon={ArrowLeftRight}
-            actionButton={isAdmin ? (
+            actionButton={true ? (
               <Button onClick={() => setCreateModal(true)} className="flex items-center gap-2 text-sm">
                 <Plus className="h-4 w-4" /> New Transfer Request
               </Button>
@@ -315,7 +315,7 @@ const Transfers = () => {
                         )}
                       </td>
                       <td className="px-5 py-3.5">
-                        {isAdmin && t.status === 'Pending' ? (
+                        {canApprove && t.status === 'Pending' ? (
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => triggerAction(t, 'approve')}

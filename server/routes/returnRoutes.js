@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.get('/', authMiddleware, getReturns);
-router.put('/:id', authMiddleware, roleMiddleware(['Admin']), returnAsset);
-router.post('/:id', authMiddleware, roleMiddleware(['Admin']), returnAsset);
+router.put('/:id', authMiddleware, roleMiddleware(['Admin', 'Asset Manager']), returnAsset);
+router.post('/:id', authMiddleware, roleMiddleware(['Admin', 'Asset Manager']), returnAsset);
 
 module.exports = router;

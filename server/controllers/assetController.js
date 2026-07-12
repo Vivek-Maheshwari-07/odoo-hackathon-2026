@@ -41,6 +41,23 @@ const getAssets = async (req, res) => {
     const { search, category, status, department, location } = req.query;
 
     const where = {};
+    const user = req.user;
+
+    if (user.role === 'Employee') {
+      where.allocations = {
+        some: {
+          employee: { user_id: user.id },
+          status: 'Active'
+        }
+      };
+    } else if (user.role === 'Department Head') {
+      const empProfile = await prisma.employee.findUnique({
+        where: { user_id: user.id }
+      });
+      if (empProfile) {
+        where.department_id = empProfile.department_id;
+      }
+    }
 
     if (category && category !== 'All') {
       where.category = {

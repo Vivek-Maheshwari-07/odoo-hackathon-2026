@@ -93,7 +93,7 @@ export const apiFetch = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         clearAuth();
         if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
           window.location.href = '/login?expired=true';
