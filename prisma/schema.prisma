@@ -19,12 +19,15 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  employee           Employee?
+  employee            Employee?
   allocations_created AssetAllocation[] @relation("AllocationAllocator")
   transfers_approved  TransferRequest[] @relation("TransferApprover")
   bookings            Booking[]            @relation("BookedBy")
   maint_reported      MaintenanceRequest[] @relation("MaintReportedBy")
   maint_assigned      MaintenanceRequest[] @relation("MaintAssignedTech")
+  created_audits      AuditCycle[]         @relation("AuditCreator")
+  verified_items      AuditItem[]          @relation("AuditVerifier")
+  assigned_audits     AuditAuditor[]
 
   @@map("users")
 }
@@ -33,19 +36,20 @@ model User {
 // MODULE 2 – ORGANIZATION SETUP
 // ============================================================
 model Department {
-  id                   Int      @id @default(autoincrement())
-  department_name      String   @unique @db.VarChar(255)
+  id                   Int        @id @default(autoincrement())
+  department_name      String     @unique @db.VarChar(255)
   department_head_id   Int?
   parent_department_id Int?
-  status               String   @default("Active") @db.VarChar(50)
-  created_at           DateTime @default(now())
-  updated_at           DateTime @updatedAt
+  status               String     @default("Active") @db.VarChar(50)
+  created_at           DateTime   @default(now())
+  updated_at           DateTime   @updatedAt
 
   employees                    Employee[]        @relation("EmpDept")
   assets                       Asset[]
   allocations                  AssetAllocation[]
   current_transfer_requests    TransferRequest[] @relation("TransferCurrentDept")
   requested_transfer_requests  TransferRequest[] @relation("TransferRequestedDept")
+  audit_cycles                 AuditCycle[]
 
   @@map("departments")
 }
@@ -111,6 +115,7 @@ model Asset {
   allocations          AssetAllocation[]
   transfer_requests    TransferRequest[]
   maintenance_requests MaintenanceRequest[]
+  audit_items          AuditItem[]
 
   @@map("assets")
 }
@@ -261,3 +266,48 @@ model MaintenanceComment {
   @@map("maintenance_comments")
 }
 
+model AuditCycle {
+  id            Int            @id @default(autoincrement())
+  audit_name    String         @db.VarChar(255)
+  department_id Int
+  start_date    DateTime
+  end_date      DateTime
+  status        String         @default("Scheduled") @db.VarChar(50) // Scheduled, Active, Completed
+  created_by    Int
+  created_at    DateTime       @default(now())
+  
+  department    Department     @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  creator       User           @relation("AuditCreator", fields: [created_by], references: [id], onDelete: Cascade)
+  items         AuditItem[]
+  auditors      AuditAuditor[]
+
+  @@map("audit_cycles")
+}
+
+model AuditItem {
+  id                  Int        @id @default(autoincrement())
+  audit_cycle_id      Int
+  asset_id            Int
+  verification_status String     @default("Pending") @db.VarChar(50) // Pending, Verified, Missing, Damaged
+  incorrect_location  Boolean    @default(false)
+  comments            String?    @db.Text
+  verified_by         Int?
+  verified_at         DateTime?
+
+  audit_cycle         AuditCycle @relation(fields: [audit_cycle_id], references: [id], onDelete: Cascade)
+  asset               Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  verifier            User?      @relation("AuditVerifier", fields: [verified_by], references: [id], onDelete: SetNull)
+
+  @@map("audit_items")
+}
+
+model AuditAuditor {
+  audit_cycle_id Int
+  user_id        Int
+
+  audit_cycle    AuditCycle @relation(fields: [audit_cycle_id], references: [id], onDelete: Cascade)
+  user           User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([audit_cycle_id, user_id])
+  @@map("audit_auditors")
+}

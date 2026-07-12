@@ -16,6 +16,7 @@ const getEmployees = async (req, res) => {
       fullName: e.user.full_name,
       name: e.user.full_name,
       email: e.user.email,
+      userId: e.user_id,
       department: e.department.department_name,
       deptId: e.department_id,
       departmentId: e.department_id,

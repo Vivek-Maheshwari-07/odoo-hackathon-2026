@@ -33,6 +33,9 @@ app.use('/api/transfers', require('./routes/transferRoutes'));
 app.use('/api/returns', require('./routes/returnRoutes'));
 app.use('/api', require('./routes/bookingRoutes'));
 app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
+app.use('/api/audit-cycles', require('./routes/auditCycleRoutes'));
+app.use('/api/audit-items', require('./routes/auditItemRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
 
 // Root path fallback
 app.get('/', (req, res) => {

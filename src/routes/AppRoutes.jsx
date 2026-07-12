@@ -9,6 +9,8 @@ import AssetDetails from '../pages/AssetDetails';
 import Allocation from '../pages/Allocation';
 import AllocationDetails from '../pages/AllocationDetails';
 import Transfers from '../pages/Transfers';
+import Audit from '../pages/Audit';
+import Reports from '../pages/Reports';
 import ComingSoon from '../pages/ComingSoon';
 import ResourceBooking from '../pages/ResourceBooking';
 import Maintenance from '../pages/Maintenance';
@@ -35,8 +37,8 @@ const AppRoutes = () => {
       <Route path="/transfers" element={<Transfers />} />
       <Route path="/booking" element={<ResourceBooking />} />
       <Route path="/maintenance" element={<Maintenance />} />
-      <Route path="/audit" element={<ComingSoon title="Audit" />} />
-      <Route path="/reports" element={<ComingSoon title="Reports" />} />
+      <Route path="/audit" element={<Audit />} />
+      <Route path="/reports" element={<Reports />} />
       <Route path="/notifications" element={<ComingSoon title="Notifications" />} />
 
       {/* Redirect wildcards */}
