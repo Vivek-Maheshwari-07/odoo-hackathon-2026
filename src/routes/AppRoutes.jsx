@@ -10,6 +10,8 @@ import Allocation from '../pages/Allocation';
 import AllocationDetails from '../pages/AllocationDetails';
 import Transfers from '../pages/Transfers';
 import ComingSoon from '../pages/ComingSoon';
+import ResourceBooking from '../pages/ResourceBooking';
+import Maintenance from '../pages/Maintenance';
 
 /**
  * Defines routes for the AssetFlow module structure.
@@ -31,8 +33,8 @@ const AppRoutes = () => {
       <Route path="/allocation" element={<Allocation />} />
       <Route path="/allocations/:id" element={<AllocationDetails />} />
       <Route path="/transfers" element={<Transfers />} />
-      <Route path="/booking" element={<ComingSoon title="Resource Booking" />} />
-      <Route path="/maintenance" element={<ComingSoon title="Maintenance" />} />
+      <Route path="/booking" element={<ResourceBooking />} />
+      <Route path="/maintenance" element={<Maintenance />} />
       <Route path="/audit" element={<ComingSoon title="Audit" />} />
       <Route path="/reports" element={<ComingSoon title="Reports" />} />
       <Route path="/notifications" element={<ComingSoon title="Notifications" />} />
