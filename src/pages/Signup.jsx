@@ -15,6 +15,7 @@ import {
   validatePassword, 
   validatePasswordMatch 
 } from '../utils/validation';
+import { apiFetch } from '../utils/api';
 
 /**
  * Signup Page.
@@ -73,20 +74,32 @@ const Signup = () => {
       return;
     }
 
-    // Simulate account registration
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setAlertFeedback({
-        type: 'success',
-        message: 'Account registered successfully! Redirecting you to login...'
+    apiFetch('/auth/register', {
+      method: 'POST',
+      body: {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      }
+    })
+      .then((data) => {
+        setIsLoading(false);
+        setAlertFeedback({
+          type: 'success',
+          message: data.message || 'Account registered successfully! Redirecting you to login...'
+        });
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        setAlertFeedback({
+          type: 'danger',
+          message: error.message || 'An error occurred during account registration.'
+        });
       });
-      
-      // Auto redirect to login after success
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    }, 1500);
   };
 
   return (

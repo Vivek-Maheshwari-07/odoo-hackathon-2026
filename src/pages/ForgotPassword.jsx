@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../co
 import Input from '../components/common/Input';
 import LoadingButton from '../components/common/LoadingButton';
 import { validateEmail } from '../utils/validation';
+import { apiFetch } from '../utils/api';
 
 /**
  * ForgotPassword Page.
@@ -30,12 +31,20 @@ const ForgotPassword = () => {
       return;
     }
 
-    // Process submission simulation
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSuccess(true);
-    }, 1500);
+    apiFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: { email }
+    })
+      .then(() => {
+        setIsLoading(false);
+        setIsSuccess(true);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        // Even if mock endpoint returns errors, show it
+        alert(error.message || 'Error sending recovery link.');
+      });
   };
 
   return (

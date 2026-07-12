@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/layout/AuthLayout';
 import FormContainer from '../components/layout/FormContainer';
 import Logo from '../components/layout/Logo';
@@ -9,12 +9,14 @@ import PasswordInput from '../components/common/PasswordInput';
 import LoadingButton from '../components/common/LoadingButton';
 import Alert, { AlertTitle, AlertDescription } from '../components/common/Alert';
 import { validateEmail, validatePassword } from '../utils/validation';
+import { apiFetch, setAuth } from '../utils/api';
 
 /**
  * Login Page.
  * Authenticates user credentials, showcases visual warnings and success alerts with remember me storage.
  */
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,15 +50,29 @@ const Login = () => {
       return;
     }
 
-    // Simulated login transaction
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setAlertFeedback({
-        type: 'success',
-        message: 'Authentication successful! Welcome to AssetFlow ERP portal.'
+    apiFetch('/auth/login', {
+      method: 'POST',
+      body: { email, password }
+    })
+      .then((data) => {
+        setIsLoading(false);
+        setAuth(data.token, data.user);
+        setAlertFeedback({
+          type: 'success',
+          message: 'Authentication successful! Welcome to AssetFlow ERP portal.'
+        });
+        setTimeout(() => {
+          navigate('/organization-setup');
+        }, 1000);
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        setAlertFeedback({
+          type: 'danger',
+          message: error.message || 'Authentication failed. Please check your credentials.'
+        });
       });
-    }, 1500);
   };
 
   return (

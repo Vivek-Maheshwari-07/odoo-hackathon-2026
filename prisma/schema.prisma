@@ -1,0 +1,66 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  full_name  String   @db.VarChar(255)
+  email      String   @unique @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  role       String   @default("Employee") @db.VarChar(50)
+  status     String   @default("Active") @db.VarChar(50)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  employee   Employee?
+
+  @@map("users")
+}
+
+model Department {
+  id                   Int       @id @default(autoincrement())
+  department_name      String    @unique @db.VarChar(255)
+  department_head_id   Int?
+  parent_department_id Int?
+  status               String    @default("Active") @db.VarChar(50)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  employees            Employee[] @relation("EmpDept")
+
+  @@map("departments")
+}
+
+model AssetCategory {
+  id                 Int      @id @default(autoincrement())
+  category_name      String   @unique @db.VarChar(255)
+  description        String   @db.Text
+  warranty_period    Int?
+  depreciation_years Int?
+  status             String   @default("Active") @db.VarChar(50)
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("asset_categories")
+}
+
+model Employee {
+  id            Int      @id @default(autoincrement())
+  user_id       Int      @unique
+  department_id Int
+  employee_code String   @unique @db.VarChar(50)
+  designation   String   @default("Employee") @db.VarChar(255)
+  phone         String   @default("") @db.VarChar(50)
+  status        String   @default("Active") @db.VarChar(50)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  department    Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
+
+  @@map("employees")
+}
