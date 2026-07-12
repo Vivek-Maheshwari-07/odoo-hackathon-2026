@@ -6,6 +6,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================================================
+// MODULE 1 – AUTHENTICATION
+// ============================================================
 model User {
   id         Int      @id @default(autoincrement())
   full_name  String   @db.VarChar(255)
@@ -16,22 +19,37 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  employee   Employee?
+  employee            Employee?
+  allocations_created AssetAllocation[] @relation("AllocationAllocator")
+  transfers_approved  TransferRequest[] @relation("TransferApprover")
+  bookings            Booking[]            @relation("BookedBy")
+  maint_reported      MaintenanceRequest[] @relation("MaintReportedBy")
+  maint_assigned      MaintenanceRequest[] @relation("MaintAssignedTech")
+  created_audits      AuditCycle[]         @relation("AuditCreator")
+  verified_items      AuditItem[]          @relation("AuditVerifier")
+  assigned_audits     AuditAuditor[]
 
   @@map("users")
 }
 
+// ============================================================
+// MODULE 2 – ORGANIZATION SETUP
+// ============================================================
 model Department {
-  id                   Int       @id @default(autoincrement())
-  department_name      String    @unique @db.VarChar(255)
+  id                   Int        @id @default(autoincrement())
+  department_name      String     @unique @db.VarChar(255)
   department_head_id   Int?
   parent_department_id Int?
-  status               String    @default("Active") @db.VarChar(50)
-  created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
+  status               String     @default("Active") @db.VarChar(50)
+  created_at           DateTime   @default(now())
+  updated_at           DateTime   @updatedAt
 
-  employees            Employee[] @relation("EmpDept")
-  assets               Asset[]
+  employees                    Employee[]        @relation("EmpDept")
+  assets                       Asset[]
+  allocations                  AssetAllocation[]
+  current_transfer_requests    TransferRequest[] @relation("TransferCurrentDept")
+  requested_transfer_requests  TransferRequest[] @relation("TransferRequestedDept")
+  audit_cycles                 AuditCycle[]
 
   @@map("departments")
 }
@@ -46,7 +64,7 @@ model AssetCategory {
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
-  assets             Asset[]
+  assets Asset[]
 
   @@map("asset_categories")
 }
@@ -62,12 +80,18 @@ model Employee {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  department    Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
+  user               User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  department         Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
+  allocations        AssetAllocation[]
+  current_transfers  TransferRequest[] @relation("TransferCurrentEmployee")
+  requested_transfers TransferRequest[] @relation("TransferRequestedEmployee")
 
   @@map("employees")
 }
 
+// ============================================================
+// MODULE 3 – ASSET MANAGEMENT
+// ============================================================
 model Asset {
   id                 Int           @id @default(autoincrement())
   asset_tag          String        @unique @db.VarChar(50)
@@ -86,8 +110,204 @@ model Asset {
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
 
-  category           AssetCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
-  department         Department    @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  category             AssetCategory        @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  department           Department           @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  allocations          AssetAllocation[]
+  transfer_requests    TransferRequest[]
+  maintenance_requests MaintenanceRequest[]
+  audit_items          AuditItem[]
 
   @@map("assets")
+}
+
+// ============================================================
+// MODULE 4 – ALLOCATION & TRANSFER
+// ============================================================
+model AssetAllocation {
+  id                   Int       @id @default(autoincrement())
+  asset_id             Int
+  employee_id          Int
+  department_id        Int
+  allocated_by         Int
+  allocation_date      DateTime
+  expected_return_date DateTime?
+  actual_return_date   DateTime?
+  purpose              String?   @db.VarChar(255)
+  notes                String?   @db.Text
+  status               String    @default("Active") @db.VarChar(50) // Active | Returned | Transferred
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  asset      Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  employee   Employee   @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  allocator  User       @relation("AllocationAllocator", fields: [allocated_by], references: [id], onDelete: Cascade)
+
+  @@map("asset_allocations")
+}
+
+model TransferRequest {
+  id                      Int       @id @default(autoincrement())
+  asset_id                Int
+  current_employee_id     Int
+  requested_employee_id   Int
+  current_department_id   Int
+  requested_department_id Int
+  reason                  String?   @db.Text
+  status                  String    @default("Pending") @db.VarChar(50) // Pending | Approved | Rejected
+  approved_by             Int?
+  approved_at             DateTime?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+
+  asset                Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  current_employee     Employee   @relation("TransferCurrentEmployee", fields: [current_employee_id], references: [id], onDelete: Cascade)
+  requested_employee   Employee   @relation("TransferRequestedEmployee", fields: [requested_employee_id], references: [id], onDelete: Cascade)
+  current_department   Department @relation("TransferCurrentDept", fields: [current_department_id], references: [id], onDelete: Cascade)
+  requested_department Department @relation("TransferRequestedDept", fields: [requested_department_id], references: [id], onDelete: Cascade)
+  approver             User?      @relation("TransferApprover", fields: [approved_by], references: [id], onDelete: SetNull)
+
+  @@map("transfer_requests")
+}
+
+// ============================================================
+// MODULE 5 – RESOURCE BOOKING
+// ============================================================
+model Resource {
+  id            Int            @id @default(autoincrement())
+  resource_name String         @db.VarChar(150)
+  resource_type String         @db.VarChar(100) // Meeting Room, Conference Room, Projector, Company Vehicle, Shared Equipment
+  location      String?        @db.VarChar(200)
+  capacity      Int?
+  status        String         @default("Active") @db.VarChar(50) // Active | Inactive | Under Maintenance
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  bookings      Booking[]
+
+  @@map("resources")
+}
+
+model Booking {
+  id           Int       @id @default(autoincrement())
+  resource_id  Int
+  employee_id  Int
+  booking_date DateTime  @db.Date
+  start_time   String    @db.VarChar(10) // HH:mm
+  end_time     String    @db.VarChar(10) // HH:mm
+  purpose      String    @db.VarChar(300)
+  notes        String?   @db.Text
+  status       String    @default("Upcoming") @db.VarChar(50) // Upcoming | Ongoing | Completed | Cancelled
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  resource     Resource  @relation(fields: [resource_id], references: [id], onDelete: Cascade)
+  user         User      @relation("BookedBy", fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@index([resource_id, booking_date])
+  @@index([status])
+  @@map("bookings")
+}
+
+// ============================================================
+// MODULE 6 – MAINTENANCE MANAGEMENT
+// ============================================================
+model MaintenanceRequest {
+  id            Int       @id @default(autoincrement())
+  asset_id      Int
+  employee_id   Int
+  technician_id Int?
+  issue_title   String    @db.VarChar(300)
+  description   String    @db.Text
+  priority      String    @db.VarChar(50) // Low | Medium | High | Critical
+  status        String    @default("Pending") @db.VarChar(50) // Pending | Approved | Tech Assigned | In Progress | Resolved | Rejected
+  photo         String?   @db.VarChar(500)
+  resolved_at   DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  asset       Asset                  @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  reporter    User                   @relation("MaintReportedBy", fields: [employee_id], references: [id], onDelete: Cascade)
+  technician  User?                  @relation("MaintAssignedTech", fields: [technician_id], references: [id], onDelete: SetNull)
+  timeline    MaintenanceTimeline[]
+  comments    MaintenanceComment[]
+
+  @@index([asset_id])
+  @@index([employee_id])
+  @@index([status])
+  @@map("maintenance_requests")
+}
+
+model MaintenanceTimeline {
+  id             Int       @id @default(autoincrement())
+  request_id     Int
+  changed_by_id  Int
+  from_status    String?   @db.VarChar(50)
+  to_status      String    @db.VarChar(50)
+  note           String?   @db.VarChar(500)
+  created_at     DateTime  @default(now())
+
+  request        MaintenanceRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([request_id])
+  @@map("maintenance_timeline")
+}
+
+model MaintenanceComment {
+  id          Int       @id @default(autoincrement())
+  request_id  Int
+  author_id   Int
+  body        String    @db.Text
+  created_at  DateTime  @default(now())
+
+  request     MaintenanceRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([request_id])
+  @@map("maintenance_comments")
+}
+
+model AuditCycle {
+  id            Int            @id @default(autoincrement())
+  audit_name    String         @db.VarChar(255)
+  department_id Int
+  start_date    DateTime
+  end_date      DateTime
+  status        String         @default("Scheduled") @db.VarChar(50) // Scheduled, Active, Completed
+  created_by    Int
+  created_at    DateTime       @default(now())
+  
+  department    Department     @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  creator       User           @relation("AuditCreator", fields: [created_by], references: [id], onDelete: Cascade)
+  items         AuditItem[]
+  auditors      AuditAuditor[]
+
+  @@map("audit_cycles")
+}
+
+model AuditItem {
+  id                  Int        @id @default(autoincrement())
+  audit_cycle_id      Int
+  asset_id            Int
+  verification_status String     @default("Pending") @db.VarChar(50) // Pending, Verified, Missing, Damaged
+  incorrect_location  Boolean    @default(false)
+  comments            String?    @db.Text
+  verified_by         Int?
+  verified_at         DateTime?
+
+  audit_cycle         AuditCycle @relation(fields: [audit_cycle_id], references: [id], onDelete: Cascade)
+  asset               Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  verifier            User?      @relation("AuditVerifier", fields: [verified_by], references: [id], onDelete: SetNull)
+
+  @@map("audit_items")
+}
+
+model AuditAuditor {
+  audit_cycle_id Int
+  user_id        Int
+
+  audit_cycle    AuditCycle @relation(fields: [audit_cycle_id], references: [id], onDelete: Cascade)
+  user           User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([audit_cycle_id, user_id])
+  @@map("audit_auditors")
 }

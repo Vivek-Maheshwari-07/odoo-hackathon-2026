@@ -6,7 +6,14 @@ import ForgotPassword from '../pages/ForgotPassword';
 import OrganizationSetup from '../pages/OrganizationSetup';
 import Assets from '../pages/Assets';
 import AssetDetails from '../pages/AssetDetails';
+import Allocation from '../pages/Allocation';
+import AllocationDetails from '../pages/AllocationDetails';
+import Transfers from '../pages/Transfers';
+import Audit from '../pages/Audit';
+import Reports from '../pages/Reports';
 import ComingSoon from '../pages/ComingSoon';
+import ResourceBooking from '../pages/ResourceBooking';
+import Maintenance from '../pages/Maintenance';
 
 /**
  * Defines routes for the AssetFlow module structure.
@@ -25,11 +32,13 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ComingSoon title="Dashboard" />} />
       <Route path="/assets" element={<Assets />} />
       <Route path="/assets/:id" element={<AssetDetails />} />
-      <Route path="/allocation" element={<ComingSoon title="Allocation & Transfer" />} />
-      <Route path="/booking" element={<ComingSoon title="Resource Booking" />} />
-      <Route path="/maintenance" element={<ComingSoon title="Maintenance" />} />
-      <Route path="/audit" element={<ComingSoon title="Audit" />} />
-      <Route path="/reports" element={<ComingSoon title="Reports" />} />
+      <Route path="/allocation" element={<Allocation />} />
+      <Route path="/allocations/:id" element={<AllocationDetails />} />
+      <Route path="/transfers" element={<Transfers />} />
+      <Route path="/booking" element={<ResourceBooking />} />
+      <Route path="/maintenance" element={<Maintenance />} />
+      <Route path="/audit" element={<Audit />} />
+      <Route path="/reports" element={<Reports />} />
       <Route path="/notifications" element={<ComingSoon title="Notifications" />} />
 
       {/* Redirect wildcards */}

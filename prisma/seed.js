@@ -50,6 +50,23 @@ async function main() {
     });
     console.log('Demo categories seeded.');
   }
+
+  // Create initial demo resources for Module 5
+  const resourcesCount = await prisma.resource.count();
+  if (resourcesCount === 0) {
+    await prisma.resource.createMany({
+      data: [
+        { resource_name: 'Board Room A',       resource_type: 'Conference Room', location: 'Floor 3, East Wing',  capacity: 20, status: 'Active' },
+        { resource_name: 'Meeting Room B1',    resource_type: 'Meeting Room',    location: 'Floor 1, North Wing',  capacity: 8,  status: 'Active' },
+        { resource_name: 'Meeting Room B2',    resource_type: 'Meeting Room',    location: 'Floor 1, South Wing',  capacity: 6,  status: 'Active' },
+        { resource_name: 'Projector Unit 01',  resource_type: 'Projector',       location: 'AV Storage Room',      capacity: null, status: 'Active' },
+        { resource_name: 'Toyota Innova - HR', resource_type: 'Company Vehicle', location: 'Basement Parking',     capacity: null, status: 'Active' },
+        { resource_name: 'Dell Laptop Kit',    resource_type: 'Shared Equipment',location: 'IT Dept, Floor 2',     capacity: null, status: 'Active' }
+      ]
+    });
+    console.log('Demo resources seeded.');
+  }
+
 }
 
 main()
