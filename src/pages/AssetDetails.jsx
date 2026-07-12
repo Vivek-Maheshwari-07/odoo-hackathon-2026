@@ -10,6 +10,7 @@ import Input from '../components/common/Input';
 import Alert, { AlertDescription } from '../components/common/Alert';
 import {
   ArrowLeft,
+  ArrowLeftRight,
   Edit2,
   Trash2,
   Calendar,
@@ -18,7 +19,6 @@ import {
   Activity,
   History,
   Package,
-  Wrench,
   User,
   ShieldAlert,
   Upload
@@ -362,6 +362,37 @@ const AssetDetails = () => {
           </Card>
         </div>
 
+        {/* Lifecycle timeline */}
+        <Card className="p-5 bg-white shadow-sm border border-border">
+          <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-4 flex items-center gap-1.5">
+            <History className="h-4 w-4 text-primary" />
+            Lifecycle Timeline
+          </h3>
+          {asset.timeline?.length > 0 ? (
+            <div className="flex flex-col gap-3">
+              {asset.timeline.map(item => (
+                <div key={item.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className="h-8 w-8 rounded-lg bg-white border border-border flex items-center justify-center shrink-0">
+                    {item.type === 'transfer'
+                      ? <ArrowLeftRight className="h-4 w-4 text-sky-600" />
+                      : item.type === 'return'
+                        ? <Package className="h-4 w-4 text-green-600" />
+                        : <History className="h-4 w-4 text-primary" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-text-primary">{item.label}</p>
+                    <p className="text-xs text-text-secondary">{item.user}</p>
+                  </div>
+                  <span className="font-mono text-xs text-text-secondary shrink-0">{item.date || '—'}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-text-secondary italic">No lifecycle history available.</p>
+          )}
+        </Card>
+
         {/* History tables */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Allocation history */}
@@ -379,6 +410,7 @@ const AssetDetails = () => {
                       <th className="px-4 py-2">Department</th>
                       <th className="px-4 py-2">From</th>
                       <th className="px-4 py-2">To</th>
+                      <th className="px-4 py-2">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-600">
@@ -390,6 +422,9 @@ const AssetDetails = () => {
                         <td className="px-4 py-3 font-mono">
                           {h.returnedDate || <span className="text-green-600 font-bold">Active</span>}
                         </td>
+                        <td className="px-4 py-3">
+                          <Badge variant={h.status === 'Active' ? 'success' : h.status === 'Returned' ? 'secondary' : 'info'}>{h.status}</Badge>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -400,30 +435,27 @@ const AssetDetails = () => {
             )}
           </Card>
 
-          {/* Maintenance log */}
+          {/* Transfer log */}
           <Card className="md:col-span-1 p-5 bg-white shadow-sm border border-border">
             <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-3 flex items-center gap-1.5">
-              <Wrench className="h-4 w-4 text-amber-500" />
-              Maintenance Log
+              <ArrowLeftRight className="h-4 w-4 text-sky-500" />
+              Transfer Log
             </h3>
-            {asset.maintenanceHistory?.length > 0 ? (
+            {asset.transferHistory?.length > 0 ? (
               <div className="flex flex-col gap-3 max-h-[220px] overflow-y-auto pr-1">
-                {asset.maintenanceHistory.map(m => (
-                  <div key={m.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1.5 text-xs">
+                {asset.transferHistory.map(t => (
+                  <div key={t.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1.5 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-text-primary">{m.type} Service</span>
-                      <Badge variant={m.status === 'Completed' ? 'success' : 'warning'} className="text-[10px]">{m.status}</Badge>
+                      <span className="font-bold text-text-primary">{t.fromEmployee} to {t.toEmployee}</span>
+                      <Badge variant={t.status === 'Approved' ? 'success' : t.status === 'Pending' ? 'warning' : 'danger'} className="text-[10px]">{t.status}</Badge>
                     </div>
-                    <div className="flex justify-between text-slate-500">
-                      <span>Provider: {m.provider}</span>
-                      <span>Cost: ${m.cost}</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono">{m.date}</span>
+                    <span className="text-slate-500">{t.fromDepartment} to {t.toDepartment}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{t.approvedAt || t.createdAt}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-text-secondary italic">No maintenance records available.</p>
+              <p className="text-xs text-text-secondary italic">No transfer records available.</p>
             )}
           </Card>
         </div>

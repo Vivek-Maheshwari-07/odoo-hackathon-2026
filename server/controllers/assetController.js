@@ -74,7 +74,13 @@ const getAssets = async (req, res) => {
       where,
       include: {
         category: true,
-        department: true
+        department: true,
+        allocations: {
+          where: { status: 'Active' },
+          include: { employee: { include: { user: true } } },
+          orderBy: { id: 'desc' },
+          take: 1
+        }
       },
       orderBy: {
         id: 'desc'
@@ -98,7 +104,8 @@ const getAssets = async (req, res) => {
       image: a.image ? `/uploads/assets/${a.image}` : null,
       isShared: a.is_shared,
       description: a.description || '',
-      assignedTo: a.status === 'Allocated' ? 'Mock Assigned User' : 'None'
+      assignedTo: a.allocations[0]?.employee?.user?.full_name || 'None',
+      assignedEmployeeId: a.allocations[0]?.employee_id || null
     }));
 
     return res.status(200).json(results);
@@ -120,13 +127,93 @@ const getAssetById = async (req, res) => {
       where: { id: parsedId },
       include: {
         category: true,
-        department: true
+        department: true,
+        allocations: {
+          include: {
+            employee: { include: { user: true } },
+            department: true,
+            allocator: true
+          },
+          orderBy: { allocation_date: 'desc' }
+        },
+        transfer_requests: {
+          include: {
+            current_employee: { include: { user: true } },
+            requested_employee: { include: { user: true } },
+            current_department: true,
+            requested_department: true,
+            approver: true
+          },
+          orderBy: { created_at: 'desc' }
+        }
       }
     });
 
     if (!asset) {
       return res.status(404).json({ message: 'Asset not found.' });
     }
+
+    const allocationHistory = asset.allocations.map(a => ({
+      id: a.id,
+      employee: a.employee.user.full_name,
+      employeeCode: a.employee.employee_code,
+      department: a.department.department_name,
+      allocatedBy: a.allocator.full_name,
+      allocatedDate: a.allocation_date ? a.allocation_date.toISOString().split('T')[0] : '',
+      expectedReturnDate: a.expected_return_date ? a.expected_return_date.toISOString().split('T')[0] : '',
+      returnedDate: a.actual_return_date ? a.actual_return_date.toISOString().split('T')[0] : '',
+      status: a.status,
+      purpose: a.purpose || '',
+      notes: a.notes || ''
+    }));
+
+    const transferHistory = asset.transfer_requests.map(t => ({
+      id: t.id,
+      fromEmployee: t.current_employee.user.full_name,
+      toEmployee: t.requested_employee.user.full_name,
+      fromDepartment: t.current_department.department_name,
+      toDepartment: t.requested_department.department_name,
+      reason: t.reason || '',
+      status: t.status,
+      approvedBy: t.approver?.full_name || null,
+      approvedAt: t.approved_at ? t.approved_at.toISOString().split('T')[0] : '',
+      createdAt: t.created_at ? t.created_at.toISOString().split('T')[0] : ''
+    }));
+
+    const timeline = [
+      {
+        id: `asset-${asset.id}`,
+        type: 'status',
+        label: 'Asset Registered',
+        date: asset.created_at.toISOString().split('T')[0],
+        user: 'System'
+      },
+      ...asset.allocations.map(a => ({
+        id: `allocation-${a.id}`,
+        type: 'allocation',
+        label: `${a.status === 'Active' ? 'Allocated to' : a.status} ${a.employee.user.full_name}`,
+        date: a.allocation_date ? a.allocation_date.toISOString().split('T')[0] : '',
+        user: a.allocator.full_name
+      })),
+      ...asset.allocations
+        .filter(a => a.status === 'Returned' && a.actual_return_date)
+        .map(a => ({
+          id: `return-${a.id}`,
+          type: 'return',
+          label: `Returned by ${a.employee.user.full_name}`,
+          date: a.actual_return_date.toISOString().split('T')[0],
+          user: a.employee.user.full_name
+        })),
+      ...asset.transfer_requests.map(t => ({
+        id: `transfer-${t.id}`,
+        type: 'transfer',
+        label: `Transfer ${t.status}: ${t.current_employee.user.full_name} to ${t.requested_employee.user.full_name}`,
+        date: (t.approved_at || t.created_at).toISOString().split('T')[0],
+        user: t.approver?.full_name || 'Pending approval'
+      }))
+    ].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    const activeAllocation = asset.allocations.find(a => a.status === 'Active');
 
     const result = {
       id: asset.id,
@@ -145,15 +232,13 @@ const getAssetById = async (req, res) => {
       image: asset.image ? `/uploads/assets/${asset.image}` : null,
       isShared: asset.is_shared,
       description: asset.description || '',
-      timeline: [
-        { id: 1, type: 'status', label: 'Asset Registered', date: asset.created_at.toISOString().split('T')[0], user: 'System Administrator' }
-      ],
-      allocationHistory: [
-        { id: 1, employee: 'John Doe', department: asset.department.department_name, allocatedDate: '2026-01-10', returnedDate: '2026-05-15' }
-      ],
-      maintenanceHistory: [
-        { id: 1, type: 'Preventive', cost: 150, date: '2026-03-22', status: 'Completed', provider: 'Global IT Support' }
-      ]
+      assignedTo: activeAllocation?.employee?.user?.full_name || 'None',
+      assignedEmployeeId: activeAllocation?.employee_id || null,
+      timeline,
+      allocationHistory,
+      transferHistory,
+      returnHistory: allocationHistory.filter(h => h.status === 'Returned'),
+      maintenanceHistory: []
     };
 
     return res.status(200).json(result);

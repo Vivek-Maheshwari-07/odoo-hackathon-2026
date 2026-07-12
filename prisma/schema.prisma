@@ -6,6 +6,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ============================================================
+// MODULE 1 – AUTHENTICATION
+// ============================================================
 model User {
   id         Int      @id @default(autoincrement())
   full_name  String   @db.VarChar(255)
@@ -16,22 +19,30 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  employee   Employee?
+  employee           Employee?
+  allocations_created AssetAllocation[] @relation("AllocationAllocator")
+  transfers_approved  TransferRequest[] @relation("TransferApprover")
 
   @@map("users")
 }
 
+// ============================================================
+// MODULE 2 – ORGANIZATION SETUP
+// ============================================================
 model Department {
-  id                   Int       @id @default(autoincrement())
-  department_name      String    @unique @db.VarChar(255)
+  id                   Int      @id @default(autoincrement())
+  department_name      String   @unique @db.VarChar(255)
   department_head_id   Int?
   parent_department_id Int?
-  status               String    @default("Active") @db.VarChar(50)
-  created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
+  status               String   @default("Active") @db.VarChar(50)
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 
-  employees            Employee[] @relation("EmpDept")
-  assets               Asset[]
+  employees                    Employee[]        @relation("EmpDept")
+  assets                       Asset[]
+  allocations                  AssetAllocation[]
+  current_transfer_requests    TransferRequest[] @relation("TransferCurrentDept")
+  requested_transfer_requests  TransferRequest[] @relation("TransferRequestedDept")
 
   @@map("departments")
 }
@@ -46,7 +57,7 @@ model AssetCategory {
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
 
-  assets             Asset[]
+  assets Asset[]
 
   @@map("asset_categories")
 }
@@ -62,12 +73,18 @@ model Employee {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  department    Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
+  user               User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  department         Department @relation("EmpDept", fields: [department_id], references: [id], onDelete: Cascade)
+  allocations        AssetAllocation[]
+  current_transfers  TransferRequest[] @relation("TransferCurrentEmployee")
+  requested_transfers TransferRequest[] @relation("TransferRequestedEmployee")
 
   @@map("employees")
 }
 
+// ============================================================
+// MODULE 3 – ASSET MANAGEMENT
+// ============================================================
 model Asset {
   id                 Int           @id @default(autoincrement())
   asset_tag          String        @unique @db.VarChar(50)
@@ -86,8 +103,60 @@ model Asset {
   created_at         DateTime      @default(now())
   updated_at         DateTime      @updatedAt
 
-  category           AssetCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
-  department         Department    @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  category          AssetCategory   @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  department        Department      @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  allocations       AssetAllocation[]
+  transfer_requests TransferRequest[]
 
   @@map("assets")
+}
+
+// ============================================================
+// MODULE 4 – ALLOCATION & TRANSFER
+// ============================================================
+model AssetAllocation {
+  id                   Int       @id @default(autoincrement())
+  asset_id             Int
+  employee_id          Int
+  department_id        Int
+  allocated_by         Int
+  allocation_date      DateTime
+  expected_return_date DateTime?
+  actual_return_date   DateTime?
+  purpose              String?   @db.VarChar(255)
+  notes                String?   @db.Text
+  status               String    @default("Active") @db.VarChar(50) // Active | Returned | Transferred
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  asset      Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  employee   Employee   @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [department_id], references: [id], onDelete: Cascade)
+  allocator  User       @relation("AllocationAllocator", fields: [allocated_by], references: [id], onDelete: Cascade)
+
+  @@map("asset_allocations")
+}
+
+model TransferRequest {
+  id                      Int       @id @default(autoincrement())
+  asset_id                Int
+  current_employee_id     Int
+  requested_employee_id   Int
+  current_department_id   Int
+  requested_department_id Int
+  reason                  String?   @db.Text
+  status                  String    @default("Pending") @db.VarChar(50) // Pending | Approved | Rejected
+  approved_by             Int?
+  approved_at             DateTime?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+
+  asset                Asset      @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  current_employee     Employee   @relation("TransferCurrentEmployee", fields: [current_employee_id], references: [id], onDelete: Cascade)
+  requested_employee   Employee   @relation("TransferRequestedEmployee", fields: [requested_employee_id], references: [id], onDelete: Cascade)
+  current_department   Department @relation("TransferCurrentDept", fields: [current_department_id], references: [id], onDelete: Cascade)
+  requested_department Department @relation("TransferRequestedDept", fields: [requested_department_id], references: [id], onDelete: Cascade)
+  approver             User?      @relation("TransferApprover", fields: [approved_by], references: [id], onDelete: SetNull)
+
+  @@map("transfer_requests")
 }

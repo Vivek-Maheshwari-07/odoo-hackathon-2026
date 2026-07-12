@@ -30,6 +30,7 @@ const getDepartments = async (req, res) => {
         id: `DP${String(d.id).padStart(3, '0')}`,
         dbId: d.id,
         name: d.department_name,
+        department_name: d.department_name,
         head: headName,
         headId: d.department_head_id,
         parent: parentName,

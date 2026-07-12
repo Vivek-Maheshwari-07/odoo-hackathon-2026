@@ -13,10 +13,13 @@ const getEmployees = async (req, res) => {
     const result = emps.map(e => ({
       id: `EMP${String(e.id).padStart(3, '0')}`,
       dbId: e.id,
+      fullName: e.user.full_name,
       name: e.user.full_name,
       email: e.user.email,
       department: e.department.department_name,
       deptId: e.department_id,
+      departmentId: e.department_id,
+      departmentName: e.department.department_name,
       role: e.user.role,
       status: e.status,
       employeeCode: e.employee_code,
